@@ -13,3 +13,5 @@
 ### Chapter 2 : Proof By Induction
 
 [Web Page](https://softwarefoundations.cis.upenn.edu/lf-current/Induction.html)
+
+[Answers](./code/Logical%20Foundatons/Induction.v)
