@@ -340,17 +340,17 @@ Example test_ltb3: (ltb 4 2) = false.
 Proof. simpl. reflexivity. Qed.
 (* Exercise Ends. *)
 
-Theorem plus_O_n : forall n : nat, 0 + n = n.
+Theorem plus_0_n : forall n : nat, 0 + n = n.
 Proof.
   intros n. simpl. reflexivity. 
 Qed.
 
-Theorem plus_O_n' : forall n : nat, 0 + n = n.
+Theorem plus_0_n' : forall n : nat, 0 + n = n.
 Proof.
   intros n. reflexivity.
 Qed.
 
-Theorem plus_O_n'' : forall n : nat, 0 + n = n.
+Theorem plus_0_n'' : forall n : nat, 0 + n = n.
 Proof.
   intros m. reflexivity.
 Qed.
@@ -360,7 +360,7 @@ Proof.
   intros n. reflexivity.
 Qed.
 
-Theorem mult_O_1 : forall n : nat, 0 * n = 0.
+Theorem mult_0_1 : forall n : nat, 0 * n = 0.
 Proof.
   intros n. reflexivity.
 Qed.
@@ -389,7 +389,7 @@ Qed.
 Check mult_n_O.
 Check mult_n_Sm.
 
-Theorem mult_n_O_m_O : forall p q : nat,
+Theorem mult_n_0_m_0 : forall p q : nat,
   (p * 0) + (q * 0) = 0.
 Proof.
   intros p q.
@@ -409,14 +409,14 @@ Proof.
 Qed.
 (* Exercise Ends. *)
 
-Theorem plus_1_neq_O_firstry : forall n : nat,
+Theorem plus_1_neq_0_firstry : forall n : nat,
   (n + 1) =? 0 = false.
 Proof.
   intros n.
   simpl.
 Abort.
 
-Theorem plus_1_neq_O : forall n : nat,
+Theorem plus_1_neq_0 : forall n : nat,
   (n + 1) =? 0 = false.
 Proof.
   intros n. destruct n as [| n'] eqn:E.
@@ -490,7 +490,7 @@ Proof.
 Qed.
 (* Exercise Ends. *)
 
-Theorem plus_1_neq_O' : forall n : nat,
+Theorem plus_1_neq_0' : forall n : nat,
   (n + 1) =? 0 = false.
 Proof.
   intros [|n].
