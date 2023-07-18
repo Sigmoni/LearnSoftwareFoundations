@@ -18,8 +18,12 @@
 
 [Answers](./code/Logical%20Foundatons/Induction.v)
 
+[Notes](./notes/Vol1/Chpt2.md)
+
 ### Chapter 3 : Working with Structured Data
 
 [Web Page](https://softwarefoundations.cis.upenn.edu/lf-current/Lists.html)
 
 [Answers](./code/Logical%20Foundatons/Lists.v)
+
+[Notes](./notes/Vol1/Chpt3.md)
