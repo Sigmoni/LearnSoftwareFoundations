@@ -5,4 +5,4 @@
 *.vok
 *.vos
 Makefile
-.conf
+*.conf
