@@ -27,3 +27,11 @@
 [Answers](./code/Logical%20Foundatons/Lists.v)
 
 [Notes](./notes/Vol1/Chpt3.md)
+
+### Chapter 4 : Polymorphism and Higher-Order Functions
+
+[Web Page](https://softwarefoundations.cis.upenn.edu/lf-current/Poly.html)
+
+[Answers](./code/Logical%20Foundatons/Poly.v)
+
+[Notes](./notes/Vol1/Chpt4.md)
