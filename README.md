@@ -4,6 +4,21 @@
 
 ## Volumn I : Logical Foundations
 
+### Build the solutions
+
+* Enter the directory of solutions.
+* Generate the `Makefile`
+
+```shell 
+coq_makefile -f _CoqProject *.v -o Makefile
+```
+
+* Build the solutions
+
+```shell
+make
+```
+
 ### Chapter 1 : Functional Programming in CoQ
 
 [Web Page](https://softwarefoundations.cis.upenn.edu/lf-current/Basics.html)
