@@ -250,7 +250,22 @@ Qed.
 (* Exercise ends *)
 
 (* Exercise: 3 stars, standard, especially useful (plus_n_n_injective) *)
-Theorem f: .
+Theorem plus_n_n_injective : forall n m,
+  n + n = m + m ->
+  n = m.
 Proof.
-  
+  intros n. induction n as [|n' IHn'].
+  - intros m H. simpl in H.
+    destruct m as [|m'].
+    + reflexivity.
+    + discriminate.
+  - intros m H. destruct m as [|m'].
+    + discriminate.
+    + simpl in H.
+      rewrite <- plus_n_Sm in H.
+      rewrite <- plus_n_Sm in H.
+      injection H as H.
+      apply eq_implies_succ_equal.
+      apply IHn'. apply H.
 Qed.
+(* Exercise ends *)
