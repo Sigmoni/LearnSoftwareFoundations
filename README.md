@@ -50,3 +50,11 @@ make
 [Answers](./code/Logical%20Foundatons/Poly.v)
 
 [Notes](./notes/Vol1/Chpt4.md)
+
+### Chapter 5 : More Basic Tatics
+
+[Web Page](https://softwarefoundations.cis.upenn.edu/lf-current/Tactics.html)
+
+[Answers](./code/Logical%20Foundatons/Tactics.v)
+
+[Notes](./notes/Vol1/Chpt5.md)
