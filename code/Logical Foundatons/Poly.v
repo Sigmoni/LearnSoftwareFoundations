@@ -1,3 +1,4 @@
+Set Warnings "-notation-overridden,-parsing,-deprecated-hint-without-locality".
 From LF Require Export Lists.
 
 Inductive boollist : Type :=
