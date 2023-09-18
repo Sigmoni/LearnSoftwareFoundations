@@ -594,3 +594,45 @@ Proof.
   - apply H1.
   - discriminate H2.
 Qed.
+(* Exercise ends *)
+
+Lemma add_comm3 :
+  forall x y z, x + (y + z) = (z + y) + x.
+Proof.
+  intros x y z.
+  rewrite add_comm.
+  rewrite (add_comm y z).
+  reflexivity.
+Qed.
+
+Theorem in_not_nil :
+  forall A (x : A) (l : list A), In x l -> l <> [].
+Proof.
+  intros A x l H. unfold not. intros Hl.
+  rewrite Hl in H. simpl in H. apply H.
+Qed.
+
+Lemma in_not_nil_42 :
+  forall l : list nat, In 42 l -> l <> [].
+Proof.
+  intros l H.
+  apply (in_not_nil nat 42).
+  apply H.
+Qed.
+
+Example lemma_application_ex :
+  forall {n : nat} {ns : list nat},
+    In n (map (fun m => m * 0) ns) ->
+    n = 0.
+Proof.
+  intros n ns H.
+  destruct (proj1 _ _ (In_map_iff _ _ _ _ _) H) as [m [Hm _]].
+  rewrite mul_0_r in Hm. symmetry. apply Hm.
+Qed.
+
+Example function_equality_ex1 :
+  (fun x => 3 + x) = (fun x => (pred 4) + x).
+Proof.
+  reflexivity.
+Qed.
+
