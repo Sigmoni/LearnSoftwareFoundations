@@ -133,3 +133,16 @@ Proof.
 Qed.
 (* Exercise ends *)
 
+Theorem inversion_ex1 : forall (n m o : nat),
+  [n; m] = [o; o] -> [n] = [m].
+Proof.
+  intros n m o H. inversion H.
+  reflexivity.
+Qed.
+
+Theorem inversion_ex2 : forall (n : nat),
+  S n = 0 -> 2 + 2 = 5.
+Proof.
+  intros n H. inversion H.
+Qed.
+
