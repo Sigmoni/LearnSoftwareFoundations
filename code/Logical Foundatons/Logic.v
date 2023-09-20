@@ -107,7 +107,7 @@ Proof.
 Qed.
 
 (* Exercise: 2 stars, standard (and_assoc) *)
-Theorem add_assoc : forall P Q R : Prop,
+Theorem and_assoc : forall P Q R : Prop,
   P /\ (Q /\ R) -> (P /\ Q) /\ R.
 Proof.
   intros P Q R [HP [HQ HR]]. split.
