@@ -1547,3 +1547,611 @@ Proof.
 Qed.
 (* Exercise ends *)
 
+(* Exercise: 5 stars, standard, optional (palindrome_converse) *)
+Theorem rev_length: forall {X: Type} (l : list X),
+  length l = length (rev l).
+Proof.
+  intros X l. induction l.
+  - simpl. reflexivity.
+  - simpl. rewrite app_length. 
+    simpl. rewrite <- plus_n_Sm.
+    rewrite add_0_r. f_equal.
+    apply IHl.
+Qed.
+
+Theorem list_app_subtract: forall {X: Type} (l1 l2 l:list X),
+  length l1 = length l2 -> l1 ++ l = l2 ++ l -> l1 = l2.
+Proof.
+  intros X l1. induction l1.
+  - intros l2 l H1 H2.
+    simpl in H1. destruct l2.
+    + reflexivity.
+    + simpl in H1. discriminate H1.
+  - intros l2 l H1 H2.
+    destruct l2.
+    + simpl in H1. discriminate H1.
+    + simpl in H1. injection H1 as H1.
+      simpl in H2. injection H2 as H2.
+      apply (IHl1 l2 l H1) in H.
+      rewrite H2. rewrite H.
+      reflexivity.
+Qed.
+
+Lemma list_eq_length_eq: forall {X : Type} (l1 l2 : list X),
+  l1 = l2 -> length l1 = length l2.
+Proof.
+  intros X l1 l2 H. 
+  rewrite H. 
+  reflexivity.
+Qed.
+
+Lemma add_r_subtract: forall (n m o : nat),
+  n + o = m + o -> n = m.
+Proof.
+  intros n m o. induction o.
+  - rewrite add_0_r. rewrite add_0_r. 
+    intros H. apply H.
+  - intros H. 
+    rewrite <- plus_n_Sm in H.
+    rewrite <- plus_n_Sm in H.
+    injection H as H.
+    apply IHo in H.
+    apply H.
+Qed.
+
+Theorem app_subtract: forall {X: Type} (l1 l2 l : list X),
+  l1 ++ l = l2 ++ l -> l1 = l2.
+Proof.
+  intros X l1 l2 l H.
+  apply list_app_subtract with (l := l).
+  - apply list_eq_length_eq in H.
+    rewrite app_length in H.
+    rewrite app_length in H.
+    apply add_r_subtract in H.
+    apply H.
+  - apply H.
+Qed.
+
+Lemma palindrome_converse_wrapper: forall {X:Type} (n : nat) (l: list X),
+  length l <= n -> l = rev l -> pal l.
+Proof.
+  intros X n. induction n as [|n' IHn'].
+  - assert (H': forall {X: Type} (l: list X), length l <= 0 -> l = []).
+    { intros X0 l H. destruct l.
+      - reflexivity.
+      - simpl in H. inversion H. }
+    intros l H. apply H' in H. rewrite H.
+    intros Eq. apply EmptyPal.
+  - intros l H Hrev. destruct l eqn:Eql.
+    + apply EmptyPal.
+    + simpl in Hrev. destruct (rev l0) eqn:Eqrev.
+      { simpl in Hrev. rewrite Hrev. apply SinglePal. }
+      { rewrite <- (rev_involutive X l0) in Hrev.
+        rewrite Eqrev in Hrev.
+        simpl in Hrev. injection Hrev as Hinj.
+        rewrite Hinj in H0.
+        apply app_subtract in H0.
+        rewrite <- (rev_involutive X l0).
+        rewrite Eqrev. simpl. 
+        simpl in H. apply le_S_n in H.
+        rewrite <- (rev_involutive X l0) in H.
+        rewrite Eqrev in H.
+        simpl in H. rewrite app_length in H.
+        simpl in H. rewrite <- plus_n_Sm in H.
+        rewrite add_0_r in H.  
+        apply le_prop1 in H. 
+        rewrite <- rev_length in H.
+        rewrite H0. rewrite <- Hinj.
+        symmetry in H0.
+        apply (IHn' l1 H) in H0.
+        replace (x :: l1 ++ [x]) with ([x] ++ l1 ++ [x]).
+        + apply IndPal. apply H0.
+        + reflexivity. }
+Qed.
+
+Theorem palindrome_converse: forall {X : Type} (l : list X),
+  l = rev l -> pal l.
+Proof.
+  intros X l.
+  apply palindrome_converse_wrapper with (n := length l).
+  apply le_n.
+Qed.
+(* Exercise ends *)
+
+(* Exercise: 4 stars, advanced, optional (NoDup) *)
+Definition disjoint {X: Type} (l1 l2 : list X) : Prop :=
+  forall x, In x l1 -> ~(In x l2).
+
+Inductive NoDup {X : Type} : list X -> Prop :=
+  | EmptyNoDup : NoDup []
+  | IndNoDup (x : X) (l : list X) (Hnd : NoDup l) (Hnin : ~(In x l)) : NoDup (x :: l).
+
+Theorem disjoint_app_nodup: forall {X : Type} (l1 l2 : list X),
+  NoDup (l1 ++ l2) -> disjoint l1 l2.
+Proof.
+  intros X l1. induction l1.
+  - intros l2 H. unfold disjoint. 
+    intros x H'. inversion H'. 
+  - intros l2. simpl. intros H. inversion H.
+    apply IHl1 in Hnd. 
+    unfold disjoint. simpl. 
+    intros y H'. destruct H' as [H' | H'].
+    + rewrite <- H'. intros Hin2. 
+      apply Hnin. 
+      apply In_app_iff.
+      right. apply Hin2.
+    + apply Hnd. apply H'.
+Qed.
+(* Exercise ends *)
+
+(* Exercise: 4 stars, advanced, optional (pigeonhole_principle) *)
+Lemma in_split: forall {X : Type} (x : X) (l : list X),
+  In x l -> exists l1 l2, l = l1 ++ x :: l2.
+Proof.
+  intros X x l. induction l.
+  - intros H. inversion H.
+  - simpl. intros H. destruct H as [H | H].
+    + exists [], l.
+      simpl. rewrite H.
+      reflexivity.
+    + apply IHl in H.
+      destruct H as [l1 [l2 H]].
+      exists (x0 :: l1), l2.
+      simpl. rewrite H. reflexivity.
+Qed.
+
+Inductive repeat {X : Type} : list X -> Prop :=
+  | NewRepeat (x : X) (l : list X) (Hl : NoDup l) (Hin : In x l) : repeat (x :: l) 
+  | ContRepeat (x : X) (l : list X) (Hl : repeat l) : repeat (x :: l).
+
+Lemma list_is_nodup_or_repeat: excluded_middle ->
+  forall {X : Type} (l : list X),
+  NoDup l \/ repeat l.
+Proof.
+  intros exm X l. induction l.
+  - left. apply EmptyNoDup.
+  - destruct IHl as [IHl | IHl].
+    + destruct (exm (In x l)).
+      { right. apply NewRepeat.
+        + apply IHl.
+        + apply H. }
+      { left. apply IndNoDup.
+        + apply IHl.
+        + apply H. }
+    + right. apply ContRepeat. 
+      apply IHl.
+Qed.
+
+Theorem pigeonhole_principle: excluded_middle ->
+  forall (X : Type) (l1 l2 : list X),
+  (forall x, In x l1 -> In x l2) -> 
+  length l2 < length l1 ->
+  repeat l1.
+Proof.
+  intros EM X l1. induction l1.
+  - intros. simpl in H0. inversion H0.
+  - intros. destruct (EM (In x l1)) as [Hin | Hnin].
+    + destruct (list_is_nodup_or_repeat EM l1).
+      { apply NewRepeat.
+        - apply H1.
+        - apply Hin. }
+      { apply ContRepeat. apply H1. }
+    + apply ContRepeat.
+      destruct (in_split x l2) as [ll [lr Hisl2]].
+      { apply H. simpl. left. reflexivity. }
+      apply IHl1 with (ll ++ lr).
+      * intros. apply In_app_iff. 
+        assert(Hinxl2: In x0 l2).
+        { apply H. simpl. right. apply H1. }
+        rewrite Hisl2 in Hinxl2.
+        rewrite In_app_iff in Hinxl2.
+        simpl in Hinxl2. destruct Hinxl2 as [H' | [H' | H']].
+        { left. apply H'. }
+        { rewrite <- H' in H1. exfalso. apply Hnin. apply H1. }
+        { right. apply H'. }
+      * rewrite Hisl2 in H0.
+        simpl in H0. rewrite app_length in H0. 
+        simpl in H0. rewrite <- plus_n_Sm in H0.
+        apply Sn_le_Sm__n_le_m in H0. 
+        rewrite app_length. unfold lt.
+        apply H0.
+Qed.
+(* Exercise ends *)
+
+Require Import Coq.Strings.Ascii.
+
+Definition string := list ascii.
+
+Lemma provable_equiv_true : forall (P : Prop), P <-> (P <-> True).
+Proof.
+  intros.
+  split.
+  - intros. constructor.
+    + intros. reflexivity.
+    + intros. apply H.
+  - intros. apply H. reflexivity.
+Qed.
+
+Lemma not_equiv_false: forall (P : Prop), ~P -> (P <-> False).
+Proof.
+  intros.
+  split.
+  - apply H.
+  - intros. destruct H0.
+Qed.
+
+Lemma null_matches_none: forall (s : string), (s =~ EmptySet) <-> False.
+Proof.
+  intros.
+  apply not_equiv_false.
+  unfold not. intros.
+  inversion H.
+Qed.
+
+Lemma empty_matches_eps: forall (s : string), s =~ EmptyStr <-> s = [].
+Proof.
+  split.
+  - intros. inversion H. reflexivity.
+  - intros. rewrite H. apply MEmpty.
+Qed.
+
+Lemma empty_nomatch_ne : forall (a : ascii) s, (a :: s =~ EmptyStr) <-> False.
+Proof.
+  intros.
+  apply not_equiv_false.
+  unfold not. intros. inversion H.
+Qed.
+
+Lemma char_nomatch_char:
+  forall (a b : ascii) s, b <> a -> (b :: s =~ Char a <-> False).
+Proof.
+  intros.
+  apply not_equiv_false.
+  unfold not.
+  intros.
+  apply H.
+  inversion H0.
+  reflexivity.
+Qed.
+
+Lemma char_eps_suffix: forall (a : ascii) s, a :: s =~ Char a <-> s = [].
+Proof.
+  split.
+  - intros. inversion H. reflexivity.
+  - intros. rewrite H. apply MChar.
+Qed.
+
+Lemma app_exists: forall (s : string) re0 re1,
+  s =~ App re0 re1 <->
+  exists s0 s1, s = s0 ++ s1 /\ s0 =~ re0 /\ s1 =~ re1.
+Proof.
+  intros.
+  split.
+  - intros. inversion H. exists s1, s2. split.
+    + reflexivity.
+    + split.
+      * apply H3.
+      * apply H4.
+  - intros [s0 [s1 [Happ [Hmat0 Hmat1]]]].
+    rewrite Happ.
+    apply (MApp s0 _ s1 _ Hmat0 Hmat1).
+Qed.
+
+(* Exercise: 3 stars, standard, optional (app_ne) *)
+Lemma app_ne : forall (a : ascii) s re0 re1,
+  a :: s =~ (App re0 re1) <->
+  ([] =~ re0 /\ a :: s =~ re1) \/ 
+  exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re0 /\ s1 =~ re1.
+Proof.
+  intros. split.
+  - intros H. inversion H.
+    destruct s1.
+    + left. split.
+      * apply H3.
+      * simpl. apply H4.
+    + right. simpl in H1. 
+      injection H1 as Eqx.
+      exists s1, s2. split.
+      * symmetry. apply H1.
+      * split. 
+        { rewrite Eqx in H3.
+          apply H3. }
+        { apply H4. }
+  - intros H. destruct H as [H | H].
+    + destruct H as [H1 H2].
+      replace (a :: s) with ([] ++ (a :: s)).
+      * apply MApp.
+        { apply H1. }
+        { apply H2. }
+      * reflexivity.
+    + destruct H as [s0 [s1 [H1 [H2 H3]]]].
+      rewrite H1. replace (a :: s0 ++ s1) with ((a :: s0) ++ s1).
+      * apply MApp.
+        { apply H2. }
+        { apply H3. }
+      * reflexivity.
+Qed.
+
+Lemma union_disj : forall (s : string) re0 re1,
+  s =~ Union re0 re1 <->
+  s =~ re0 \/ s =~ re1.
+Proof.
+  intros. split.
+  - intros H. inversion H.
+    + left. apply H2.
+    + right. apply H1.
+  - intros H. destruct H as [H | H].
+    + apply MUnionL. apply H.
+    + apply MUnionR. apply H.
+Qed.
+(* Exercise ends *)
+
+(* Exercise: 3 stars, standard, optional (star_ne) *)
+Lemma star_ne : forall (a :ascii) s re,
+  a :: s =~ Star re <->
+  exists s0 s1, s = s0 ++ s1 /\ a :: s0 =~ re /\ s1 =~ Star re.
+Proof.
+  intros. split.
+  - intros H. 
+    remember (a :: s) as s'.
+    remember (Star re) as re'. 
+    induction H.
+    + discriminate.
+    + discriminate.
+    + discriminate.
+    + discriminate.
+    + discriminate.
+    + discriminate.
+    + destruct s1.
+      * simpl in Heqs'.
+        apply IHexp_match2 in Heqs'. 
+        { destruct Heqs' as [s0 [s1 [H1 [H2 H3]]]].
+          exists s0, s1.
+          split. 
+          - apply H1.
+          - split.
+            + apply H2.
+            + apply H3. }
+        { apply Heqre'. }
+      * simpl in Heqs'. 
+        injection Heqs' as Heqxa.
+        injection Heqre' as Heqre'.
+        exists s1, s2. split.
+        { symmetry. apply H1. }
+        { split.
+          - rewrite Heqxa in H. 
+            rewrite Heqre' in H.
+            apply H. 
+          - apply H0. }
+  - intros H. destruct H as [s0 [s1 [H1 [H2 H3]]]].
+    rewrite H1. replace (a :: s0 ++ s1) with ((a :: s0) ++ s1).
+    + apply MStarApp.
+      * apply H2.
+      * apply H3.
+    + reflexivity.
+Qed.
+
+Definition refl_matches_eps m :=
+  forall re : reg_exp ascii, reflect ([] =~ re) (m re).
+(* Exercise ends *)
+
+(* Exercise: 2 stars, standard, optional (match_eps) *)
+Fixpoint match_eps (re : reg_exp ascii) : bool :=
+  match re with
+    | EmptySet => false
+    | EmptyStr => true
+    | Char _ => false
+    | App re0 re1 => (match_eps re0) && (match_eps re1)
+    | Union re0 re1 => (match_eps re0) || (match_eps re1)
+    | Star _ => true
+  end.
+(* Exercise ends *)
+
+(* Exercise: 3 stars, standard, optional (match_eps_refl) *)
+Lemma match_eps_refl : refl_matches_eps match_eps.
+Proof.
+  unfold refl_matches_eps.
+  intros re. induction re.
+  - apply ReflectF.
+    intros H. inversion H.
+  - apply ReflectT.
+    apply MEmpty.
+  - apply ReflectF.
+    intros H. inversion H.
+  - simpl. inversion IHre1.
+    + inversion IHre2.
+      * apply ReflectT.
+        apply (MApp [] re1 [] re2 H0 H2).
+      * apply ReflectF.
+        intros H'. inversion H'.
+        destruct s2.
+        { apply H2. apply H7. }
+        { destruct s1.
+          - simpl in H3. discriminate H3.
+          - simpl in H3. discriminate H3. }
+    + apply ReflectF.
+      intros H'. inversion H'.
+      destruct s1.
+      * apply H0. apply H4.
+      * simpl in H1. discriminate H1.
+  - simpl. inversion IHre1.
+    + apply ReflectT.
+      apply MUnionL. apply H0.
+    + inversion IHre2.
+      * apply ReflectT.
+        apply MUnionR.
+        apply H2.
+      * apply ReflectF.
+        intros H'. inversion H'.
+        { apply H0. apply H5. }
+        { apply H2. apply H5. }
+  - apply ReflectT.
+    apply MStar0.
+Qed.
+(* Exercise ends *)
+
+Definition is_der re (a : ascii) re' :=
+  forall s, a :: s =~ re <-> s =~ re'.
+
+Definition derives d := forall a re, is_der re a (d a re).
+
+(* Exercise: 3 stars, standard, optional (derive) *)
+Fixpoint derive (a : ascii) (re : reg_exp ascii) : reg_exp ascii :=
+  match re with
+    | EmptySet => EmptySet
+    | EmptyStr => EmptySet
+    | Char x => if eqb x a then EmptyStr else EmptySet
+    | App re0 re1 => if match_eps re0
+                     then Union (derive a re1) (App (derive a re0) re1)
+                     else App (derive a re0) re1
+    | Union re0 re1 => Union (derive a re0) (derive a re1)
+    | Star re => App (derive a re) (Star re)
+  end.
+(* Exercise ends *)
+
+Example c := ascii_of_nat 99.
+Example d := ascii_of_nat 100.
+
+Example test_der0 : match_eps (derive c (EmptySet)) = false.
+Proof. reflexivity. Qed.
+
+Example test_der1 : match_eps (derive c (Char c)) = true.
+Proof. reflexivity. Qed.
+
+Example test_der2 : match_eps (derive c (Char d)) = false.
+Proof. reflexivity. Qed.
+
+Example test_der3 : match_eps (derive c (App (Char c) EmptyStr)) = true.
+Proof. reflexivity. Qed.
+
+Example test_der4 : match_eps (derive c (App EmptyStr (Char c))) = true.
+Proof. reflexivity. Qed.
+
+Example test_der5 : match_eps (derive c (Star (Char c))) = true.
+Proof. reflexivity. Qed.
+
+Example test_der6 : 
+  match_eps (derive d (derive c (App (Char c) (Char d)))) = true.
+Proof. reflexivity. Qed.
+
+Example test_der7 :
+  match_eps (derive d (derive c (App (Char d) (Char c)))) = false.
+Proof. reflexivity. Qed.
+
+(* Exercise: 4 stars, standard, optional (derive_corr) *)
+Lemma derive_corr : derives derive.
+Proof.
+  unfold derives. unfold is_der.
+  intros. split. 
+  - generalize dependent s. induction re.
+    + intros s H. inversion H.
+    + intros s H. inversion H.
+    + intros s H. inversion H.
+      simpl. rewrite eqb_refl.
+      apply MEmpty.
+    + intros s H. simpl.
+      destruct (match_eps_refl re1).
+      * apply app_ne in H.
+        destruct H as [[H1 H2] | [s0 [s1 [H1 [H2 H3]]]]].
+        { apply MUnionL.
+          apply IHre2.
+          apply H2. }
+        { apply MUnionR.
+          rewrite H1. 
+          apply MApp.
+          - apply IHre1. apply H2.
+          - apply H3. }
+      * apply app_ne in H.
+        destruct H as [[H1 H2] | [s0 [s1 [H1 [H2 H3]]]]].
+        { exfalso. apply H0. apply H1. }
+        { rewrite H1. apply MApp.
+          - apply IHre1.
+            apply H2.
+          - apply H3. }
+    + intros s H. simpl.
+      apply union_disj.
+      apply union_disj in H.
+      destruct H.
+      * left. apply IHre1. apply H.
+      * right. apply IHre2. apply H.
+    + intros s H. simpl.
+      apply star_ne in H.
+      destruct H as [s0 [s1 [H1 [H2 H3]]]].
+      rewrite H1. apply MApp.
+      * apply IHre. apply H2.
+      * apply H3.
+  - generalize dependent s. induction re.
+    + simpl. intros s H. inversion H.
+    + simpl. intros s H. inversion H.
+    + simpl. intros s H. destruct (eqb t a) eqn:E.
+      * inversion H. 
+        apply eqb_eq in E.
+        rewrite E.
+        apply MChar.
+      * inversion H.
+    + simpl. intros s H. destruct (match_eps_refl re1).
+      * apply app_ne.
+        apply union_disj in H.
+        destruct H as [H | H].
+        { left. split.
+          - apply H0.
+          - apply IHre2. 
+            apply H. }
+        { inversion H.
+          right. exists s1, s2. split.
+          - reflexivity.
+          - split.
+            + apply IHre1.
+              apply H4.
+            + apply H5. }
+      * apply app_ne. inversion H.
+        right. exists s1, s2. split.
+        { reflexivity. }
+        { split.
+          - apply IHre1. apply H4.
+          - apply H5. }
+    + simpl. intros s H. 
+      apply union_disj in H.
+      apply union_disj.
+      destruct H as [H | H].
+      * left. apply IHre1. apply H.
+      * right. apply IHre2. apply H.
+    + simpl. intros s H.
+      inversion H. apply star_ne.
+      exists s1, s2. split.
+      * reflexivity.
+      * split.
+        { apply IHre. apply H3. }
+        { apply H4. }
+Qed.
+(* Exercise ends *)
+
+Definition matches_regex m : Prop :=
+  forall (s : string) re, reflect (s =~ re) (m s re).
+
+(* Exercise: 2 stars, standard, optional (regex_match) *)
+Fixpoint regex_match (s : string) (re : reg_exp ascii) : bool :=
+  match s with
+    | [] => match_eps re 
+    | x :: s' => regex_match s' (derive x re)
+  end.
+(* Exercise ends *)
+
+(* Exercise: 3 stars, standard, optional (regex_match_correct) *)
+Theorem regex_match_correct : matches_regex regex_match.
+Proof.
+  unfold matches_regex. intros s.
+  induction s.
+  - intros re. unfold regex_match.
+    destruct (match_eps_refl re).
+    + apply ReflectT. apply H.
+    + apply ReflectF. apply H.
+  - intros re. simpl.
+    destruct (IHs (derive x re)).
+    + apply ReflectT.
+      apply derive_corr. apply H.
+    + apply ReflectF. intros H'.
+      apply H. apply derive_corr.
+      apply H'.
+Qed.
+(* Exercise ends *)
