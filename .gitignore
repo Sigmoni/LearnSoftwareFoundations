@@ -6,3 +6,4 @@
 *.vos
 Makefile
 *.conf
+.DS_Store
